@@ -4,6 +4,7 @@ export const USER_JWT_SECRET = "FDSHHSDJDS";
 export const ADMIN_JWT_SECRET = "shgdsjdsjds";
 import mongoose from "mongoose";
 
+export const CALLBACK = ""
 export const corsConfig = {
     origin: ['https://binarykeeda.com/' ,'https://www.binarykeeda.com/' , 'http://localhost:3000'],
     methods: ["GET", "POST", "PUT", "DELETE"],
