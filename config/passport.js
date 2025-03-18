@@ -14,7 +14,6 @@ passport.use(
         let user = await User.findOne({ googleId: profile.id });
 
         if (!user) {
-          // User doesn't exist, create a new user (Sign-Up)
           user = await User.create({
             googleId: profile.id,
             name: profile.displayName,

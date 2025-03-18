@@ -12,7 +12,8 @@ const userSchema = new Schema(
         solutions:{type:String,default:0},
         program:{type:String, default:""},
         university:{type:String , default: ""},
-        isVerified:{type:Boolean , default:false}
+        isVerified:{type:Boolean , default:false},
+        googleId:String
     },
     { timestamps: true }
 );

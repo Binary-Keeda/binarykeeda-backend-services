@@ -5,7 +5,7 @@ export const ADMIN_JWT_SECRET = "shgdsjdsjds";
 import mongoose from "mongoose";
 
 export const corsConfig = {
-    origin: ['https://www.techeaseportal.com' ,'https://techeaseportal.com' , 'http://localhost:3000'],
+    origin: ['https://binarykeeda.com/' ,'https://www.binarykeeda.com/' , 'http://localhost:3000'],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,

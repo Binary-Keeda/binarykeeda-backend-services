@@ -12,11 +12,12 @@ import { configDotenv } from "dotenv";
 import solutionRouter from "./routes/solutionRoutes.js";
 import QuizRouter from "./routes/quizRoutes.js";
 import axios from 'axios'
+import { corsConfig } from "./config/config.js";
 configDotenv();
 
 const app = express();
 // Middleware
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(cors(corsConfig));
 app.use(express.json());
 
 // MongoDB Connection
