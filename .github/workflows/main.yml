@@ -23,7 +23,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no ubuntu@13.202.58.60 << 'EOF'
           set -e  # Exit on first error
           
-          cd /home/ubuntu/techease/Techease-Frontend/app
+          cd /home/ubuntu/code/Backend
           git pull origin main || { echo 'Git pull failed' ; exit 1; }
           
           # Check if pm2 process is running and restart or start it
