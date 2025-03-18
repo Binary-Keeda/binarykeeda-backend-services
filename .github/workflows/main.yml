@@ -24,6 +24,7 @@ jobs:
           set -e  # Exit on first error
           
           cd /home/ubuntu/code/Backend
+          npm i
           git pull origin main || { echo 'Git pull failed' ; exit 1; }
           
           # Check if pm2 process is running and restart or start it
