@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 
 export const CALLBACK = ""
 export const corsConfig = {
-    origin: ['https://binarykeeda.com' ,'https://www.binarykeeda.com' , 'http://localhost:3000'],
+    origin: ['https://binarykeeda.com' ,'https://www.binarykeeda.com' , 'http://localhost:5173'],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,

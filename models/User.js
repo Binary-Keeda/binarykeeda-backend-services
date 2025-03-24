@@ -4,7 +4,7 @@ const userSchema = new Schema(
     {
         name: { type: String, required: false },
         email: { type: String, required: true, unique: true, index: true },
-        image:String,
+        avatar:String,
         password: { type: String , sparse:true },
         role: { type: String, required: true, enum: ["admin", "user"], default: 'user' },
         phone:String,
@@ -12,6 +12,7 @@ const userSchema = new Schema(
         solutions:{type:String,default:0},
         program:{type:String, default:""},
         university:{type:String , default: ""},
+        semester:{type:String,default:""},
         isVerified:{type:Boolean , default:false},
         googleId:String
     },

@@ -2,6 +2,7 @@ import express from "express";
 import passport from "passport";
 import jwt from "jsonwebtoken";
 import { configDotenv } from "dotenv";
+import { completeProfile } from "../controllers/auth.js";
 configDotenv();
 const router = express.Router();
 
@@ -39,4 +40,6 @@ router.get("/user", (req, res) => {
   }
 });
 
+
+router.post('/complete-profile'  ,completeProfile );
 export default router;

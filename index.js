@@ -44,7 +44,7 @@ app.use("/api/auth" ,customRoutes);
 app.use('/api/v1/solution/', solutionRouter);
 app.use('/api/v1/', QuizRouter);
 
-// Start Serv
+// Start Server
 app.get('/university/data/:name/',async (req, res) => {
   try {
     const response = await axios.get('http://universities.hipolabs.com/search',{

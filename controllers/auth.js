@@ -1,6 +1,6 @@
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
-import {transporter} from "../config/transporter.js";
+import { transporter } from "../config/transporter.js";
 
 export const sendLoginLink = async (req, res) => {
   try {
@@ -47,5 +47,32 @@ export const verifyToken = async (req, res) => {
     res.redirect(`${process.env.CLIENT_URL}/dashboard`);
   } catch (error) {
     res.status(400).json({ message: "Invalid or expired token" });
+  }
+};
+
+
+export const completeProfile = async (req, res) => {
+  try {
+    const { yearOfGraduation,university, program, semester, avatar, _id } = req.body;
+    const user = await User.findById(_id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.yearOfGraduation = yearOfGraduation;
+    user.program = program;
+    user.university = university;
+    user.semester = semester;
+    user.avatar = avatar;
+    user.isVerified = true;
+
+    await user.save();
+
+    // Manually re-login user to refresh session
+    req.login(user, (err) => {
+      if (err) return res.status(500).json({ error: "Error logging in user" });
+
+      res.json({data:user, message: "Profile updated successfully" });
+    });
+  } catch (error) {
+    res.status(500).json({ error: "An error occurred" });
   }
 };
