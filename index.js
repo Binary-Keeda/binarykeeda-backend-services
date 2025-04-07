@@ -13,6 +13,7 @@ import solutionRouter from "./routes/solutionRoutes.js";
 import QuizRouter from "./routes/quizRoutes.js";
 import axios from 'axios'
 import { corsConfig } from "./config/config.js";
+import testRouter from "./testSeriesService/routes/testRoutes.js";
 configDotenv();
 
 const app = express();
@@ -43,7 +44,7 @@ app.use("/auth", authRoutes);
 app.use("/api/auth" ,customRoutes);
 app.use('/api/v1/solution/', solutionRouter);
 app.use('/api/v1/', QuizRouter);
-
+app.use('/api/v2/test',testRouter);
 // Start Server
 app.get('/university/data/:name/',async (req, res) => {
   try {

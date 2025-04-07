@@ -10,6 +10,7 @@ const userSchema = new Schema(
         phone:String,
         yearOfGraduation:{type:String, default:""},
         solutions:{type:String,default:0},
+        specialisation:{type:String,default:0},
         program:{type:String, default:""},
         university:{type:String , default: ""},
         semester:{type:String,default:""},

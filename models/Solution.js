@@ -15,7 +15,7 @@ const SolutionSchema = Schema({
     ufmAttempts: {type:Number , default : 0},
     score:Number,
     isSubmitted:{type:Boolean, default:false},
-}, {
+},{
     timestamps:true
 })
 
