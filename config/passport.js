@@ -12,8 +12,8 @@ passport.use(
         return done(null, false, { message: "This account was created using Google. Please sign in with Google." });
       }
       console.log("Typed password:", password);
-console.log("Stored hash:", user.password);
-console.log("Hash starts with $2:", user.password.startsWith("$2")); // should be true
+      console.log("Stored hash:", user.password);
+      console.log("Hash starts with $2:", user.password.startsWith("$2")); // should be true
 
       const isMatch = await bcrypt.compare(password, user.password);
       console.log(isMatch)
