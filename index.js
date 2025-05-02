@@ -7,7 +7,7 @@ import MongoStore from "connect-mongo";
 import cors from "cors";
 import authRoutes from "./routes/auth.js";
 import customRoutes from './routes/custom.js';
-import "./config/passport.js"; // Passport Config
+import "./config/passport.js"; 
 import { configDotenv } from "dotenv";
 import solutionRouter from "./routes/solutionRoutes.js";
 import QuizRouter from "./routes/quizRoutes.js";
@@ -26,7 +26,6 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.error("MongoDB Error:", err));
 
-// Session Middleware
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -44,8 +43,12 @@ app.use("/auth", authRoutes);
 app.use("/api/auth" ,customRoutes);
 app.use('/api/v1/solution/', solutionRouter);
 app.use('/api/v1/', QuizRouter);
-app.use('/api/v2/test',testRouter);
-// Start Server
+app.use('/api/v2/test', (req,res,next) => {
+  if(req.isAuthenticated()) next();
+  else return res.status(401).json({msg :"Unauthorised request"})
+}  , testRouter);
+
+
 app.get('/university/data/:name/',async (req, res) => {
   try {
     const response = await axios.get('http://universities.hipolabs.com/search',{
@@ -61,7 +64,7 @@ app.get('/university/data/:name/',async (req, res) => {
   }
 });
 app.get('/',(req,res)=>{
-  res.send("Server ")
+  res.send("Server is working ")
 })
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

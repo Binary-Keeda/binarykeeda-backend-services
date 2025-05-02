@@ -1,5 +1,4 @@
 import { Schema } from 'mongoose';
-import { AnswerOptionSchema } from './AnswerSchema';
 import mongoose from 'mongoose';
 
 export const QuestionSchema = new Schema({
@@ -11,7 +10,12 @@ export const QuestionSchema = new Schema({
   marks:{type:Number},
   negative:{type:Number},
   answerOptions: {
-    type: [AnswerOptionSchema],
+    type: [
+      {
+        text:{type:String},
+      isCorrect:{type:Boolean,default:false}
+    }
+    ],
     default: undefined,
     validate: {
       validator: function(value) {
