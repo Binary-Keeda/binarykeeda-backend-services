@@ -53,7 +53,7 @@ async function reviewCode(req, res) {
     }
   } catch (error) {
     console.error("Error during code review:", error);
-    return res.status(500).json({ error: "Error during code review" });
+    return res.status(500).json({ error:error });
   }
 }
 
