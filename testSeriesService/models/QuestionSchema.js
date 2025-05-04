@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 export const QuestionSchema = new Schema({
   question: {
     type: String,
-    minlength: 10,
+    minlength: 5,
     maxlength: 1000,
   },
   marks:{type:Number},

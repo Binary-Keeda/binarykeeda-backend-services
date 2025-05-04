@@ -1,13 +1,12 @@
-import { Schema ,model } from "mongoose";
+import mongoose, { Schema ,model } from "mongoose";
 import { QuestionSchema } from './QuestionSchema.js'
-import { ProblemSchema } from "./Problem.js";
 
 const SectionSchema = Schema({
     name: { type: String, required: true },
     description: { type: String },
     sectionType: {type:String , enum:['Quiz' , 'Coding']} ,
     questionSet: [QuestionSchema],
-    problemset : [ProblemSchema]
+    problemset : [{type:mongoose.Schema.Types.ObjectId , ref:'Problem'}]
 })
 
 const TestSchema = Schema({

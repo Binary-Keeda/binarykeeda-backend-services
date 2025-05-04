@@ -14,6 +14,7 @@ import QuizRouter from "./routes/quizRoutes.js";
 import axios from 'axios'
 import { corsConfig } from "./config/config.js";
 import testRouter from "./testSeriesService/routes/testRoutes.js";
+import reviewRouter from "./testSeriesService/routes/CodeReview.js";
 configDotenv();
 
 const app = express();
@@ -48,7 +49,7 @@ app.use('/api/v2/test', (req,res,next) => {
   else return res.status(401).json({msg :"Unauthorised request"})
 }  , testRouter);
 
-
+app.use('/api/v3/review',reviewRouter);
 app.get('/university/data/:name/',async (req, res) => {
   try {
     const response = await axios.get('http://universities.hipolabs.com/search',{
@@ -68,3 +69,4 @@ app.get('/',(req,res)=>{
 })
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+

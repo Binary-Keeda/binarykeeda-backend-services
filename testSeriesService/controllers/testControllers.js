@@ -10,30 +10,120 @@ export const getParticularTestSubmission = async (req, res) => {
       return res.status(400).json({ message: "Test Id and User Id are required" });
     }
 
-    // Fetch test submission, test, and user in parallel
-    const [testSubmission, test, user] = await Promise.all([
-      TestResponse.findOne({ testId }).lean(),
-      Test.findOne({ _id: testId }).lean(),
-      User.findOne({ _id: userId }).lean(),
+    // Fetch test and user
+    const [test, user] = await Promise.all([
+      Test.findById(testId).lean().populate({
+        path: 'sections.problemset',
+        model: 'Problem',
+      }),
+      User.findById(userId).lean(),
     ]);
 
-    if (!test) {
-      return res.status(404).json({ message: "Test not found" });
-    }
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    if (testSubmission?.isSubmitted) {
-      return res.status(400).json({ message: "Test already submitted" });
+    if (!test) return res.status(404).json({ message: "Test not found" });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Check existing submissions (attempts)
+    const submissions = await TestResponse.findOne({ testId, userId }).lean();
+    // const submissions = await TestResponse.find({ testId, userId }).sort({ createdAt: -1 }).lean();
+
+    // if (submissions.length >= 1) {
+      // return res.status(403).json({ message: "Maximum attempt limit reached (1/1)" });
+    // }
+
+    // If latest one exists and is not submitted, use that
+    // const latestSubmission = submissions;
+    // if (latestSubmission && !latestSubmission.isSubmitted) {
+    //   return res.status(200).json({ testSubmission: latestSubmission, test });
+    // }
+
+    // Else create a new one
+    if(submissions) return res.status(200).json({ testSubmission: submissions, test });
+    const newSubmission = await TestResponse.create({ testId, userId, attempt:  1 });
+    return res.status(201).json({ testSubmission: newSubmission, test });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const startTest = async (req, res) => {
+  try {
+    const { submissionId } = req.params;
+
+    const updatedSubmission = await TestResponse.findByIdAndUpdate(
+      submissionId,
+      {
+        $set: {
+          startedAt: Date.now(),
+          hasAgreed: true
+        }
+      },
+      { new: true }
+    );
+
+    if (!updatedSubmission) {
+      return res.status(404).json({ message: "Test submission not found" });
     }
 
-    // Create new test submission if not found
-    if (!testSubmission) {
-      const newTestSubmission = await TestResponse.create({ testId, userId });
-      return res.status(201).json({newTestSubmission,test});
+    return res.status(200).json({ message: "Test started", testSubmission: updatedSubmission });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const submitSectionResponse = async (req, res) => {
+  try {
+    const { submissionId } = req.params;
+    const { sectionId, sectionType, quizAnswers, codingAnswers } = req.body;
+
+    if (!sectionId || !sectionType) {
+      return res.status(400).json({ message: "Section ID and type are required" });
     }
 
-    return res.status(200).json({testSubmission,test});
+    // Fetch the submission and populate test to compare section count
+    const submission = await TestResponse.findById(submissionId);
+    if (!submission) return res.status(404).json({ message: "Test submission not found" });
+
+    const test = await Test.findById(submission.testId).lean();
+    if (!test) return res.status(404).json({ message: "Test not found" });
+
+    // Update or create section response
+    let section = submission.response.find(s => s.sectionId.toString() === sectionId);
+
+    if (!section) {
+      section = {
+        sectionId,
+        sectionType,
+        quizAnswers: [],
+        codingAnswers: []
+      };
+      submission.response.push(section);
+    }
+
+    if (sectionType === 'Quiz' && quizAnswers) {
+      section.quizAnswers = quizAnswers;
+    } else if (sectionType === 'Coding' && codingAnswers) {
+      section.codingAnswers = codingAnswers;
+    }
+
+    // Increment current section pointer
+    submission.curr += 1;
+
+    // Auto-submit if all sections are completed
+    if (submission.curr >= test.sections.length) {
+      submission.isSubmitted = true;
+    }
+
+    await submission.save();
+
+    return res.status(200).json({
+      message: submission.isSubmitted ? "Test submitted" : "Section submitted",
+      testSubmission: submission
+    });
+
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Internal server error" });
