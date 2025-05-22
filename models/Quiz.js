@@ -31,8 +31,12 @@ const QuizSchema = Schema(
         duration: { type: Number, required: true },
         questions: [QuestionSchema], // Corrected this line
         marks: { type: Number, required: true },
+        minimumScore:{type:Number, default:0},
         averageScore: { type: Number, default: 0 },
-        highestScore: { type: Number, default: 0 }, // Fixed typo: "heightest" to "highest"
+        marks:{type:Number , default:0},
+        highestScore: { type: Number, default: 0 },
+        totalAttempts: { type: Number, default: 0 },  // <== add this
+
         isAvailable: { type: Boolean, default: false },
     },
     {

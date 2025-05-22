@@ -15,13 +15,14 @@ import axios from 'axios'
 import { corsConfig } from "./config/config.js";
 import testRouter from "./testSeriesService/routes/testRoutes.js";
 import reviewRouter from "./testSeriesService/routes/CodeReview.js";
+import morgan from "morgan";
 configDotenv();
 
 const app = express();
 // Middleware
 app.use(cors(corsConfig));
 app.use(express.json());
-
+app.use(morgan('dev'))
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))

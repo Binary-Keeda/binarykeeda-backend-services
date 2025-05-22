@@ -51,7 +51,7 @@ export const addQuiz = async (req, res) => {
 export const addQuestion = async (req, res) => {
     try {
         const data = JSON.parse(req.body.data);
-        console.log(data)
+        // console.log(data)
         const questionToAdd = questionSchema.parse(data);
 
         const quiz = await Quiz.findById(questionToAdd.quizId);

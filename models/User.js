@@ -15,7 +15,21 @@ const userSchema = new Schema(
         university:{type:String , default: ""},
         semester:{type:String,default:""},
         isVerified:{type:Boolean , default:false},
-        googleId:String
+        googleId:String,
+        solutions:{
+            Aptitude:{
+                average:{type:Number, default:0},
+                attempted:{type:Number, default:0},
+            },
+            Miscellaneous:{
+                average:{type:Number, default:0},
+                attempted:{type:Number, default:0},
+            },
+            Core:{
+                average:{type:Number, default:0},
+                attempted:{type:Number, default:0},
+            },
+        }
     },
     { timestamps: true }
 );

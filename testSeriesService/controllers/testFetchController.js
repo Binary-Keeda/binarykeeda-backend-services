@@ -66,11 +66,12 @@ export const getUserTests = async (req, res) => {
   
       // Fetch attempt counts for this user per test
       const attemptCounts = await TestResponse.aggregate([
-        { $match: { userId: new mongoose.Types.ObjectId(userId) } },
+        { $match: { userId: new mongoose.Types.ObjectId(userId) , isSubmitted: true} },
         {
           $group: {
             _id: "$testId",
             attempts: { $sum: 1 }
+
           }
         }
       ]);

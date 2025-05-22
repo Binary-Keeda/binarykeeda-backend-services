@@ -12,6 +12,7 @@ const SolutionSchema = Schema({
         required:true
     },
     response:{},
+    marks:{type:Number , default:0},
     ufmAttempts: {type:Number , default : 0},
     score:Number,
     isSubmitted:{type:Boolean, default:false},
