@@ -11,7 +11,8 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Function to review the code
 async function reviewCode(req, res) {
-  const { sourceCode } = req.body; // Get the source code from the request body
+  const { sourceCode , problem} = req.body; // Get the source code from the request body
+  console.log(problem)
 
   if (!sourceCode) {
     return res.status(400).json({ error: "Source code is required" });
@@ -22,21 +23,35 @@ async function reviewCode(req, res) {
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
     // Prepare the prompt to analyze the source code
-    const prompt = `
-      Analyze the following code's functions and return a JSON object with the following structure:
+const prompt = `
+Problem name: ${problem}
 
-      {
-        "indentation": score (out of 10), // A score for indentation, 10 being perfect
-        "modularity": score (out of 10), // A score for modularity, 10 being highly modular
-        "variable_name_convention": score (out of 10), // A score for variable name consistency, 10 being perfect
-        "time_complexity": score (out of 10), // A score based on time complexity, 10 being optimal
-        "space_complexity": score (out of 10) // A score based on space complexity, 10 being optimal
-      }
+Analyze the following code and return a JSON object with the structure below. **Only evaluate non-empty, meaningful functions that contain actual logic or contribute to functionality.**
 
-      Only return the JSON. Do not explain anything. Here's the code:
+- Ignore:
+  - The main function (if present)
+  - Trivial, placeholder, or empty functions
+  - Functions that do not affect the outcome or are unused
 
-      ${sourceCode}
-    `;
+Only consider code that would pass test cases (i.e., logically complete and syntactically correct functions).
+
+Return only the JSON in this format:
+
+{
+  "indentation": score (0 or 1),       
+  "modularity": score (0 or 1),        
+  "variable_name_convention": score (0 or 1),
+  "time_complexity": score (0 or 1),   
+  "space_complexity": score (0 or 1),  
+  "finalScore": score (0 or 5)          
+}
+
+**Return only the JSON.** Do not explain anything. Here's the code:
+
+${sourceCode}
+`;
+
+
 
     // Requesting the AI model for content generation
     const result = await model.generateContent(prompt);

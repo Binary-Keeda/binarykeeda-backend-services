@@ -17,8 +17,8 @@ const CodingAnswerSchema = new Schema({
 const SectionResponseSchema = new Schema({
   sectionId: { type: Schema.Types.ObjectId, required: true },
   sectionType: { type: String, enum: ['Quiz', 'Coding'], required: true },
-  quizAnswers: [QuizAnswerSchema],
-  codingAnswers: [CodingAnswerSchema]
+  quizAnswers: [],
+  codingAnswers: []
 });
 
 // Full test response by a user
