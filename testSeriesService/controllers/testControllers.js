@@ -82,43 +82,59 @@ export const submitSectionResponse = async (req, res) => {
       return res.status(400).json({ message: "Section ID and type are required" });
     }
 
-    // Fetch the submission
     const submission = await TestResponse.findById(submissionId);
     if (!submission) return res.status(404).json({ message: "Test submission not found" });
 
-    // Fetch the associated test to compare section count
     const test = await Test.findById(submission.testId).lean();
     if (!test) return res.status(404).json({ message: "Test not found" });
 
-    // Find if the section already exists
-    const sectionIndex = submission.response.findIndex(
+    let sectionIndex = submission.response.findIndex(
       s => s.sectionId.toString() === sectionId
     );
 
+    // If section doesn't exist, push it and get the new index
     if (sectionIndex === -1) {
-      // New section, push to response array
       submission.response.push({
         sectionId,
         sectionType,
-        quizAnswers: sectionType === 'Quiz' ? quizAnswers || [] : [],
-        codingAnswers: sectionType === 'Coding' ? codingAnswers || [] : []
+        quizAnswers: [],
+        codingAnswers: []
       });
-    } else {
-      // Section exists, update the relevant answers
-      if (sectionType === 'Quiz' && quizAnswers) {
-        submission.response[sectionIndex].quizAnswers = quizAnswers;
-      } else if (sectionType === 'Coding' && codingAnswers) {
-        submission.response[sectionIndex].codingAnswers = codingAnswers;
-      }
+      sectionIndex = submission.response.length - 1; // update index
     }
 
-    // Notify Mongoose that nested array has changed
-    submission.markModified('response');
+    if (sectionType === 'Quiz' && quizAnswers) {
+      submission.response[sectionIndex].quizAnswers = quizAnswers;
 
-    // Increment current section index
+      const totalQues = test.sections.find(s => s._id.toString() === sectionId)?.questionSet.length || 0;
+      let totalCorrect = 0;
+
+      const questions = test.sections.find(s => s._id.toString() === sectionId)?.questionSet || [];
+
+      questions.forEach((question) => {
+        const selectedOptionId = quizAnswers[question._id.toString()];
+        const correctOption = question.answerOptions.find(opt => opt.isCorrect);
+
+        if (
+          selectedOptionId &&
+          correctOption &&
+          selectedOptionId === correctOption._id.toString()
+        ) {
+          totalCorrect++;
+        }
+      });
+
+      submission.response[sectionIndex].totalQuestions = totalQues;
+      submission.response[sectionIndex].correctAnswers = totalCorrect;
+    }
+
+    else if (sectionType === 'Coding' && codingAnswers) {
+      submission.response[sectionIndex].codingAnswers = codingAnswers;
+    }
+
+    submission.markModified('response');
     submission.curr += 1;
 
-    // Auto-submit if last section completed
     if (submission.curr >= test.sections.length) {
       submission.isSubmitted = true;
     }
@@ -127,7 +143,7 @@ export const submitSectionResponse = async (req, res) => {
 
     return res.status(200).json({
       message: submission.isSubmitted ? "Test submitted" : "Section submitted",
-      testSubmission: submission
+      testSubmission: submission,
     });
 
   } catch (err) {
@@ -135,3 +151,4 @@ export const submitSectionResponse = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
