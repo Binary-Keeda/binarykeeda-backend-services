@@ -1,6 +1,6 @@
 import { TestResponse } from "../models/TestResponse.js";
 import { Test } from "../models/TestSchema.js";
-import User from "../../models/User.js";// Assuming User model exists
+import User from "../../../models/User.js";// Assuming User model exists
 
 export const getParticularTestSubmission = async (req, res) => {
   try {

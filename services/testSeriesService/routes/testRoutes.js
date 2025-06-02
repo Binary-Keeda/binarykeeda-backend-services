@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { getParticularTestSubmission, startTest, submitSectionResponse } from "../controllers/testControllers.js";
-import { AddProblem, addProblemToSection, addQuestionToSection, AddSection, createTest } from "../controllers/testCreateControllers.js";
+import {  addProblemToSection, addQuestionToSection, AddSection, createTest } from "../controllers/testCreateControllers.js";
 import { getAllProblems, getAllTest, getTestById, getUserTests } from "../controllers/testFetchController.js";
-import { getUserProblemResponse } from "../controllers/problemController.js";
+import { createProblem, getUserProblemResponse, updateProblem } from "../controllers/problemController.js";
 import { updateTestDetails } from "../controllers/testUpdateControllers.js";
 
 
@@ -18,7 +18,9 @@ testRouter.post('/:testId/sections', AddSection);
 //fetch all problems
 testRouter.get('/problems/get' ,getAllProblems);
 // add a problem
-testRouter.post('/problem/add' ,AddProblem);
+// testRouter.post('/problem/add' ,AddProblem);
+testRouter.post('/problem/add' ,createProblem);
+testRouter.post('/problem/update/:id' , updateProblem);
 // add a problem to section
 testRouter.post('/section/:testId/:sectionId/add-problem', addProblemToSection);
 // get user tests 
@@ -27,7 +29,7 @@ testRouter.get('/user/:userId', getUserTests);
 testRouter.post('/submit-section/:submissionId' , submitSectionResponse);
 // start a test
 testRouter.post('/start/:submissionId', startTest);
-// get a problem res
+// get a problem response
 testRouter.get('/get/problem/response' ,getUserProblemResponse )
 
 // edit a  test

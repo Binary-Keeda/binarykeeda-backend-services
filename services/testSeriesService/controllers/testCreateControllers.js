@@ -19,9 +19,6 @@ export const createTest = async (req, res) => {
   }
 };
 
-
-
-
 // POST /api/v2/test/:testId/section/:sectionId/question
 export const addQuestionToSection =  async (req, res) => {
   const { testId, sectionId } = req.params
@@ -76,33 +73,33 @@ export const AddSection = async (req, res) => {
 };
 
 
-export const AddProblem = async (req, res) => {
-    try {
-        const {
-            title,
-            description,
-            difficulty,
-            sampleTestCases,
-            functionSignatures,
-            testCases
-        } = req.body;
+// export const AddProblem = async (req, res) => {
+//     try {
+//         const {
+//             title,
+//             description,
+//             difficulty,
+//             sampleTestCases,
+//             functionSignatures,
+//             testCases
+//         } = req.body;
 
-        const newProblem = new Problem({
-            title,
-            description,
-            difficulty,
-            functionSignatures,
-            sampleTestCases,
-            testCases
-        });
+//         const newProblem = new Problem({
+//             title,
+//             description,
+//             difficulty,
+//             functionSignatures,
+//             sampleTestCases,
+//             testCases
+//         });
 
-        const savedProblem = await newProblem.save();
-        res.status(201).json({ message: 'Problem added successfully', problem: savedProblem });
-    } catch (error) {
-        console.error('Error adding problem:', error);
-        res.status(500).json({ message: 'Internal server error', error: error.message });
-    }
-};
+//         const savedProblem = await newProblem.save();
+//         res.status(201).json({ message: 'Problem added successfully', problem: savedProblem });
+//     } catch (error) {
+//         console.error('Error adding problem:', error);
+//         res.status(500).json({ message: 'Internal server error', error: error.message });
+//     }
+// };
 
 
 export const addProblemToSection = async (req, res) => {

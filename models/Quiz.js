@@ -36,7 +36,6 @@ const QuizSchema = Schema(
         marks:{type:Number , default:0},
         highestScore: { type: Number, default: 0 },
         totalAttempts: { type: Number, default: 0 },  // <== add this
-
         isAvailable: { type: Boolean, default: false },
     },
     {

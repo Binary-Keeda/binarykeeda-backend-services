@@ -13,9 +13,11 @@ import solutionRouter from "./routes/solutionRoutes.js";
 import QuizRouter from "./routes/quizRoutes.js";
 import axios from 'axios'
 import { corsConfig } from "./config/config.js";
-import testRouter from "./testSeriesService/routes/testRoutes.js";
-import reviewRouter from "./testSeriesService/routes/CodeReview.js";
+import testRouter from "./services/testSeriesService/routes/testRoutes.js";
+import reviewRouter from "./services/testSeriesService/routes/CodeReview.js";
 import morgan from "morgan";
+import profileRouter from "./services/userServices/routes/profileRoutes.js";
+import nodemailer from 'nodemailer'
 configDotenv();
 
 const app = express();
@@ -45,12 +47,18 @@ app.use("/auth", authRoutes);
 app.use("/api/auth" ,customRoutes);
 app.use('/api/v1/solution/', solutionRouter);
 app.use('/api/v1/', QuizRouter);
+
+
+
+// Test service routes
 app.use('/api/v2/test', (req,res,next) => {
   if(req.isAuthenticated()) next();
   else return res.status(401).json({msg :"Unauthorised request"})
 }  , testRouter);
-
 app.use('/api/v3/review',reviewRouter);
+
+
+// University name fetech route
 app.get('/university/data/:name/',async (req, res) => {
   try {
     const response = await axios.get('http://universities.hipolabs.com/search',{
@@ -65,9 +73,40 @@ app.get('/university/data/:name/',async (req, res) => {
     res.json([])
   }
 });
-app.get('/',(req,res)=>{
-  res.send("Server is working ")
-})
+
+
+// user profile data fetch routes
+app.use('/user/profile/' , profileRouter);
+
+
+// end point for api.binarykeeda.com
+app.get('/', (req, res) => {
+  const transporter = nodemailer.createTransport({
+    host: "smtp.zoho.in",
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.email,
+      pass: process.env.pass,
+    },
+  });
+
+  const mailOptions = {
+    from: `"Aryan from Binary Keeda" <${process.env.email}>`,
+    to: "guptaaryan131@gmail.com", // fixed typo here
+    subject: "Mail going to sapm fixed",
+    text: "This is a test email sent using Zoho SMTP and Nodemailer!",
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error("❌ Error:", error);
+      return res.status(500).send("Failed to send email");
+    }
+    console.log("✅ Email sent:", info.response);
+    res.send("Email sent successfully!");
+  });
+});
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 

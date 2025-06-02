@@ -1,6 +1,6 @@
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
-import { transporter } from "../config/transporter.js";
+import transporter  from "../config/transporter.js";
 import bcrypt from 'bcryptjs';
 import { configDotenv } from "dotenv";
 configDotenv();
@@ -20,93 +20,120 @@ export const sendLoginLink = async (req, res) => {
     const verifyLink = `${process.env.REDIRECT_URL}/verify/${encodeURIComponent(token)}`;
 
 //
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+await transporter.sendMail({
+      from: `"Binary Keeda" <${process.env.email}>`,
       to: email,
-      subject: "Your Magic Login Link",
-      html: `
-      <!DOCTYPE html>
-        <html lang="en">
-          <head>
-            <meta charset="UTF-8" />
-            <title>Email Verification</title>
-            <style>
-              body {
-                font-family: Arial, sans-serif;
-                background-color: #f4f4f4;
-                margin: 0;
-                padding: 0;
-              }
-              .container {
-                max-width: 600px;
-                margin: 40px auto;
-                background: #ffffff;
-                padding: 20px;
-                border-radius: 10px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-              }
-              .header {
-                text-align: center;
-                padding: 20px 0;
-              }
-              .header img {
-                max-width: 150px;
-                height: auto;
-              }
-              .content {
-                font-size: 16px;
-                color: #333;
-                line-height: 1.6;
-                text-align: center;
-              }
-              .footer {
-                text-align: center;
-                font-size: 12px;
-                color: #888;
-                padding: 20px 0 10px;
-              }
-              a.button {
-                display: inline-block;
-                margin-top: 20px;
-                padding: 10px 20px;
-                background-color: #007bff;
-                color: white;
-                text-decoration: none;
-                border-radius: 5px;
-              }
-              a.button:hover {
-                background-color: #0056b3;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <!-- Header -->
-              <div class="header">
-                <img src="https://binarykeeda.com/assets/logo/A37A874D-8E55-4BCC-BDF4-EBFA65B2F790_1_201_a.jpeg" alt="Binary Keeda Logo" />
-              </div>
+      subject: "Your sign up Link",
+      html:`<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Email Verification</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 40px auto;
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      }
+      .header {
+        text-align: center;
+        padding: 20px 0;
+      }
+      .header img {
+        max-width: 150px;
+        height: auto;
+      }
+      .content {
+        font-size: 16px;
+        color: #333;
+        line-height: 1.6;
+        text-align: left;
+      }
+      .button-container {
+        text-align: left;
+      }
+      .footer {
+        text-align: left;
+        font-size: 13px;
+        color: #666;
+        padding: 20px 0 10px;
+        border-top: 1px solid #e0e0e0;
+      }
+      .contact-info {
+        margin-top: 10px;
+        line-height: 1.5;
+      }
+      a.button {
+        display: inline-block;
+        padding: 10px 20px;
+        width: calc(100% - 40px);
+        text-align: center;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+      }
+      a.button:hover {
+        background-color: #0056b3;
+      }
+      a {
+        color: #007bff;
+        word-break: break-all;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <img src="https://res.cloudinary.com/drzyrq7d5/image/upload/v1744699895/binarykeeda/zipjouvv161c11xywrwk.jpg" alt="Binary Keeda Logo" />
+      </div>
 
-              <!-- Main Content -->
-              <div class="content">
-                <p>Hey there 👋</p>
-                <p>Click the button below to verify your email and complete the signup process:</p>
-                <a href="${verifyLink}" class="button">Verify Email</a>
-                <p>If the button doesn't work, copy and paste this link into your browser:</p>
-                <p><a href="${verifyLink}">${verifyLink}</a></p>
-              </div>
+      <!-- Main Content -->
+      <div class="content">
+        <p>Dear User,</p>
+        <p>Thank you for registering with <strong>Binary Keeda</strong>. To complete your sign-up process and activate your account, please verify your email address by clicking the button below:</p>
 
-              <!-- Footer -->
-              <div class="footer">
-                <p>&copy; ${new Date().getFullYear()} Binary Keeda. All rights reserved.</p>
-                <p>This is an automated message. Please do not reply.</p>
-              </div>
-            </div>
-          </body>
-        </html>`,
+        <div class="button-container">
+          <a href="${verifyLink}" class="button">Verify Email</a>
+        </div>
+
+        <p>If the above button does not work, kindly copy and paste the following link into your web browser:</p>
+        <p><a href="${verifyLink}">${verifyLink}</a></p>
+
+        <p>If you did not request this email, please disregard it. Your account will remain inactive until verified.</p>
+
+        <p>Best regards,<br/>Team Binary Keeda</p>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p>&copy; ${new Date().getFullYear()} Binary Keeda. All rights reserved.</p>
+        <p>This is an automated email. Please do not reply to this message.</p>
+        <div class="contact-info">
+          <p><strong>Contact Us</strong></p>
+          <p>📞 +91 74979 18739</p>
+          <p>✉️ support@binarykeeda.com</p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+`
     });
 //
     res.json({ message: "Verification link sent. Check your email." });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: error.message });
   }
 };

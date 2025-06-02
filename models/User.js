@@ -9,7 +9,6 @@ const userSchema = new Schema(
         role: { type: String, required: true, enum: ["admin", "user"], default: 'user' },
         phone:String,
         yearOfGraduation:{type:String, default:""},
-        solutions:{type:String,default:0},
         specialisation:{type:String,default:0},
         program:{type:String, default:""},
         university:{type:String , default: ""},
@@ -17,6 +16,10 @@ const userSchema = new Schema(
         isVerified:{type:Boolean , default:false},
         googleId:String,
         solutions:{
+            totalQuizSolutions: {type:Number , default:0},
+            totalTestSolutions: {type:Number , default:0},
+            Rank: {type:Number , default:0},
+            Points: {type:Number , default:0},
             Aptitude:{
                 average:{type:Number, default:0},
                 attempted:{type:Number, default:0},

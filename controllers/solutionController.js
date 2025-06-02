@@ -6,17 +6,23 @@ export const SubmitQuizController = async (req, res) => {
   try {
     const { userId, quizId, response } = req.body;
 
+    // ✅ Validate inputs
     if (!userId || !quizId || !response) {
       return res.status(400).json({
         message: "All fields are required: userId, quizId, and response",
       });
     }
 
+    // ✅ Find quiz
     const quiz = await Quiz.findById(quizId);
     if (!quiz) {
       return res.status(404).json({ message: "Quiz not found" });
     }
 
+    // ✅ Use predefined total marks
+    const totalMarks = Number(quiz.marks) || 0;
+
+    // ✅ Check for unsubmitted solution
     const submission = await Solution.findOne({ userId, quizId, isSubmitted: false });
     if (!submission) {
       return res.status(400).json({
@@ -24,52 +30,87 @@ export const SubmitQuizController = async (req, res) => {
       });
     }
 
-    // Calculate obtained marks
+    // ✅ Calculate obtained marks
     let obtainedMarks = 0;
 
     quiz.questions.forEach((question) => {
-      const correctOptions = question.options.filter((option) => option.isCorrect);
-      if (correctOptions[0] == response[question._id]) {
-        obtainedMarks += question.marks;
-      } else if (response[question._id]) {
-        obtainedMarks += question.negative || 0;
+      const correctOptions = question.options
+        .filter(option => option.isCorrect)
+        .map(opt => opt._id.toString());
+
+      const userAnswerRaw = response[question._id];
+      const userAnswer = userAnswerRaw ? userAnswerRaw.toString() : null;
+
+      const marks = Number(question.marks) || 0;
+      const penalty = typeof question.negative === 'number' ? question.negative : 0;
+
+      console.log("User answer:", userAnswer);
+      console.log("Correct options:", correctOptions);
+
+      if (userAnswer && correctOptions.includes(userAnswer)) {
+        console.log("correct");
+        obtainedMarks += marks;
+      } else if (userAnswer) {
+        console.log("incorrect");
+        obtainedMarks += penalty;
       }
     });
 
-    // Update submission
+
+    // ✅ Finalize submission
     submission.isSubmitted = true;
     submission.response = response;
     submission.marks = obtainedMarks;
+    submission.totalMarks = totalMarks;
     await submission.save();
 
-    // Update quiz statistics
-    quiz.totalAttempts = (quiz.totalAttempts || 0) + 1;
-    quiz.averageScore =
-      ((quiz.averageScore || 0) * (quiz.totalAttempts - 1) + obtainedMarks) /
-      quiz.totalAttempts;
-    if (obtainedMarks > (quiz.highestScore || 0)) {
+    // ✅ Update quiz stats
+    const oldAttempts = Number(quiz.totalAttempts) || 0;
+    const oldAverage = Number(quiz.averageScore) || 0;
+
+    quiz.totalAttempts = oldAttempts + 1;
+    quiz.averageScore = ((oldAverage * oldAttempts) + obtainedMarks) / quiz.totalAttempts;
+
+    if (!quiz.highestScore || obtainedMarks > quiz.highestScore) {
       quiz.highestScore = obtainedMarks;
     }
+
     await quiz.save();
 
-    // Update user's solutions stats by quiz category
+    // ✅ Update user stats
     const user = await Users.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const category = quiz.category; // Make sure this field exists in your Quiz schema and matches user.solutions keys
-    if (user.solutions && user.solutions[category]) {
-      user.solutions[category].attempted += 1;
-      const attempted = user.solutions[category].attempted;
-      const oldAverage = user.solutions[category].average;
-      user.solutions[category].average = ((oldAverage * (attempted - 1)) + obtainedMarks) / attempted;
-      await user.save();
+    const category = quiz.category;
+
+    if (!user.solutions) user.solutions = {};
+    if (!user.solutions.totalQuizSolutions) user.solutions.totalQuizSolutions = 0;
+    if (!user.solutions[category]) {
+      user.solutions[category] = {
+        attempted: 0,
+        average: 0,
+      };
     }
 
+    const userCatStats = user.solutions[category];
+    const previousAttempts = Number(userCatStats.attempted) || 0;
+    const previousAverage = Number(userCatStats.average) || 0;
+
+    userCatStats.attempted = previousAttempts + 1;
+    userCatStats.average =
+      ((previousAverage * previousAttempts) + obtainedMarks) / userCatStats.attempted;
+
+    user.solutions.totalQuizSolutions += 1;
+
+    await user.save();
+
+    // ✅ Final response
     return res.status(200).json({
       message: "Submission successful",
       marks: obtainedMarks,
+      totalMarks,
       averageScore: quiz.averageScore,
     });
 
@@ -78,11 +119,6 @@ export const SubmitQuizController = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
-
-
-
-
 
 export const getUserSubmissions = async (req,res) => {
     try {

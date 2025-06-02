@@ -128,39 +128,6 @@ export const getParticularQuiz = async (req, res) => {
     }
 };
 
-export const getParticularSolution = async (req, res) => {
-    try {
-        const { userId } = req.query;
-        const { id: quizId } = req.params;
-
-        if (!userId) return sendRes("User ID is required", 400, false, res);
-
-        const quiz = await Quiz.findById(quizId).populate("questions");
-        if (!quiz) return sendRes("Quiz Not Found", 404, false, res);
-
-        const existingSolution = await Solution.findOne({
-            quizId,
-            userId,
-            isSubmitted: true,
-        });
-
-        if (existingSolution) {
-            return sendRes("Quiz can be solved only once", 400, false, res);
-        }
-
-        // Check for an existing unsubmitted solution or create a new one
-        let solution = await Solution.findOne({ quizId, userId });
-        if (!solution) {
-            solution = await Solution.create({ quizId, userId, isSubmitted: false });
-        }
-
-        // Respond with the quiz and solution
-        return res.status(200).json({ quiz, solution });
-    } catch (error) {
-        console.error("Error fetching solution:", error.message);
-        return sendRes("Internal Server Error", 500, false, res);
-    }
-};
 
 export const editQuiz = async (req, res) => {
     const { id } = req.params; 
@@ -319,3 +286,105 @@ export const getUserQuiz = async (req, res) => {
         sendRes("Failed to fetch quizzes", 500, false, res);
     }
 };
+
+
+
+
+
+
+export const getParticularSolution = async (req, res) => {
+    try {
+        const { userId } = req.query;
+        const { id: quizId } = req.params;
+
+        if (!userId) return sendRes("User ID is required", 400, false, res);
+
+        // Efficiently fetch only required quiz fields
+      const quiz = await Quiz.findById(quizId, {
+             _id: 1, // Include quiz _id
+            duration: 1,
+            "questions._id": 1, // Include question _id
+            "questions.question": 1,
+            "questions.category": 1,
+            "questions.image": 1,
+            "questions.options._id": 1, // Include option _id
+            "questions.options.text": 1,
+            "questions.options.image": 1,
+        });
+
+
+        if (!quiz) return sendRes("Quiz Not Found", 404, false, res);
+
+        const existingSolution = await Solution.findOne({
+            quizId,
+            userId,
+            isSubmitted: true,
+        });
+
+        if (existingSolution) {
+            return sendRes("Quiz can be solved only once", 400, false, res);
+        }
+
+        let solution = await Solution.findOne({ quizId, userId });
+        if (!solution) {
+            solution = await Solution.create({ quizId, userId, isSubmitted: false });
+        }
+
+        return res.status(200).json({ quiz, solution });
+    } catch (error) {
+        console.error("Error fetching solution:", error.message);
+        return sendRes("Internal Server Error", 500, false, res);
+    }
+};
+
+// export const getParticularSolution = async (req, res) => {
+//   try {
+//     const { userId } = req.query;
+//     const { id: quizId } = req.params;
+
+//     if (!userId) return sendRes("User ID is required", 400, false, res);
+
+//     // Fetch quiz with necessary fields
+//     const quiz = await Quiz.findById(quizId, {
+//       _id: 1,
+//       duration: 1,
+//       "questions._id": 1,
+//       "questions.question": 1,
+//       "questions.category": 1,
+//       "questions.image": 1,
+//       "questions.options._id": 1,
+//       "questions.options.text": 1,
+//       "questions.options.image": 1,
+//     });
+
+//     if (!quiz) return sendRes("Quiz Not Found", 404, false, res);
+
+//     // Count how many times user has submitted this quiz
+//     const submittedAttemptsCount = await Solution.countDocuments({
+//       quizId,
+//       userId,
+//       isSubmitted: true,
+//     });
+
+//     if (submittedAttemptsCount >= 3) {
+//       return sendRes("Maximum of 3 attempts allowed for this quiz", 403, false, res);
+//     }
+
+//     // Find any unsubmitted solution for the user to resume
+//     let solution = await Solution.findOne({
+//       quizId,
+//       userId,
+//       isSubmitted: false,
+//     });
+
+//     if (!solution) {
+//       // Create new solution record for this attempt
+//       solution = await Solution.create({ quizId, userId, isSubmitted: false });
+//     }
+
+//     return res.status(200).json({ quiz, solution });
+//   } catch (error) {
+//     console.error("Error fetching solution:", error.message);
+//     return sendRes("Internal Server Error", 500, false, res);
+//   }
+// };

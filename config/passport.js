@@ -12,9 +12,8 @@ passport.use(
         return done(null, false, { message: "This account was created using Google. Please sign in with Google." });
       }
      
-
       const isMatch = await bcrypt.compare(password, user.password);
-      console.log(isMatch)
+      // console.log(isMatch)
       if (!isMatch) return done(null, false, { message: "Incorrect password" });
       return done(null, user);
     } catch (err) {
