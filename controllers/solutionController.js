@@ -1,6 +1,7 @@
 import Quiz from '../models/Quiz.js';
 import Solution from '../models/Solution.js';
 import Users from '../models/User.js';
+import Rank from '../services/userServices/models/Rank.js';
 
 export const SubmitQuizController = async (req, res) => {
   try {
@@ -56,11 +57,15 @@ export const SubmitQuizController = async (req, res) => {
       }
     });
 
-
+    
+    const UserRank = await Rank.findOne({userId:userId});
     // ✅ Finalize submission
     submission.isSubmitted = true;
     submission.response = response;
     submission.marks = obtainedMarks;
+    UserRank.points += obtainedMarks;
+    UserRank.save()
+
     submission.totalMarks = totalMarks;
     await submission.save();
 

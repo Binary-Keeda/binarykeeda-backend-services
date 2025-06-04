@@ -3,6 +3,8 @@ import jwt from "jsonwebtoken";
 import transporter  from "../config/transporter.js";
 import bcrypt from 'bcryptjs';
 import { configDotenv } from "dotenv";
+import Rank from "../services/userServices/models/Rank.js";
+import mongoose from "mongoose";
 configDotenv();
 
 export const sendLoginLink = async (req, res) => {
@@ -189,7 +191,12 @@ export const completeProfile = async (req, res) => {
     user.avatar = avatar;
     user.isVerified = true;
     user.specialisation = specialisation;
-
+    const newRank = new Rank({
+      userId: new mongoose.Types.ObjectId(_id),
+      points:0,
+    })
+    
+    await newRank.save()
     await user.save();
 
     // Manually re-login user to refresh session
@@ -199,6 +206,7 @@ export const completeProfile = async (req, res) => {
       res.json({data:user, message: "Profile updated successfully" });
     });
   } catch (error) {
+    console.log(error)
     res.status(500).json({ error: "An error occurred" });
   }
 };

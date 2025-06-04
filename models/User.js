@@ -32,6 +32,18 @@ const userSchema = new Schema(
                 average:{type:Number, default:0},
                 attempted:{type:Number, default:0},
             },
+            Ease:{
+                 average:{type:Number, default:0},
+                attempted:{type:Number, default:0},
+            },
+            Medium: {
+                 average:{type:Number, default:0},
+                attempted:{type:Number, default:0},
+            },
+            Hard :{
+                 average:{type:Number, default:0},
+                attempted:{type:Number, default:0},
+            }
         }
     },
     { timestamps: true }
