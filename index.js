@@ -81,31 +81,7 @@ app.use('/user/profile/' , profileRouter);
 
 // end point for api.binarykeeda.com
 app.get('/', (req, res) => {
-  const transporter = nodemailer.createTransport({
-    host: "smtp.zoho.in",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.email,
-      pass: process.env.pass,
-    },
-  });
-
-  const mailOptions = {
-    from: `"Aryan from Binary Keeda" <${process.env.email}>`,
-    to: "guptaaryan131@gmail.com", // fixed typo here
-    subject: "Mail going to sapm fixed",
-    text: "This is a test email sent using Zoho SMTP and Nodemailer!",
-  };
-
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error("❌ Error:", error);
-      return res.status(500).send("Failed to send email");
-    }
-    console.log("✅ Email sent:", info.response);
-    res.send("Email sent successfully!");
-  });
+  res.redirect('https://binarykeeda.com');
 });
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

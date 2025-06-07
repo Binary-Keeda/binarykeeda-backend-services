@@ -53,6 +53,7 @@ export const getUserQuizBreakdown = async (req, res) => {
     return res.status(500).json({ message: 'Server error' });
   }
 };
+
 export const getUserRanks = async (req, res) => {
   try {
     const { userId, university } = req.query;
@@ -60,7 +61,6 @@ export const getUserRanks = async (req, res) => {
     if (!userId || !university) {
       return res.status(400).json({ error: 'userId and university are required' });
     }
-
     const objectId = new mongoose.Types.ObjectId(userId);
 
     const [globalRankData] = await Rank.aggregate([
@@ -74,6 +74,7 @@ export const getUserRanks = async (req, res) => {
       { $project: { _id: 0, globalRank: '$rank' } }
     ]);
 
+    // University Rank of current user
     const [universityRankData] = await Rank.aggregate([
       {
         $lookup: {
@@ -84,16 +85,16 @@ export const getUserRanks = async (req, res) => {
         }
       },
       { $unwind: '$user' },
-     {
-    $match: {
-      $expr: {
-        $eq: [
-          { $toLower: '$user.university' },
-          university.toLowerCase()
-        ]
-      }
-    }
-  },
+      {
+        $match: {
+          $expr: {
+            $eq: [
+              { $toLower: '$user.university' },
+              university.toLowerCase()
+            ]
+          }
+        }
+      },
       {
         $setWindowFields: {
           sortBy: { points: -1 },
@@ -104,15 +105,86 @@ export const getUserRanks = async (req, res) => {
       { $project: { _id: 0, universityRank: '$rank' } }
     ]);
 
+    const topGlobal = await Rank.aggregate([
+      {
+        $setWindowFields: {
+          sortBy: { points: -1 },
+          output: { rank: { $rank: {} } }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      { $unwind: '$user' },
+      {
+        $project: {
+          _id: 0,
+          rank: 1,
+          points: 1,
+          userId: 1,
+          name: '$user.name',
+          university: '$user.university'
+        }
+      },
+      { $match: { rank: { $lte: 3 } } }
+    ]);
+
+    const topUniversity = await Rank.aggregate([
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      { $unwind: '$user' },
+      {
+        $match: {
+          $expr: {
+            $eq: [
+              { $toLower: '$user.university' },
+              university.toLowerCase()
+            ]
+          }
+        }
+      },
+      {
+        $setWindowFields: {
+          sortBy: { points: -1 },
+          output: { rank: { $rank: {} } }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          rank: 1,
+          points: 1,
+          userId: 1,
+          name: '$user.name',
+          university: '$user.university'
+        }
+      },
+      { $match: { rank: { $lte: 3 } } },
+      { $limit: 3 }
+    ]);
+
     return res.status(200).json({
       userId,
       university,
       globalRank: globalRankData?.globalRank ?? null,
-      universityRank: universityRankData?.universityRank ?? null
+      universityRank: universityRankData?.universityRank ?? null,
+      topGlobal,
+      topUniversity
     });
 
   } catch (err) {
     console.error('Rank fetch error:', err);
     res.status(500).json({ error: 'Internal Server Error' });
   }
-}
+};
