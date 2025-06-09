@@ -26,7 +26,7 @@ const SectionResponseSchema = new Schema({
 // Full test response by a user
 const TestResponseSchema = new Schema({
   testId: { type: Schema.Types.ObjectId, ref: 'Test', required: true },
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  userId: { type: Schema.Types.ObjectId, ref: 'Users', required: true },
   isSubmitted: { type: Boolean, default: false },
   response: [SectionResponseSchema],
   hasAgreed:{type:Boolean , default :false}, 

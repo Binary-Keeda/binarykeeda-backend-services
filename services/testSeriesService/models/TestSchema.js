@@ -1,7 +1,7 @@
 import mongoose, { Schema ,model } from "mongoose";
 import { QuestionSchema } from './QuestionSchema.js'
 
-const SectionSchema = Schema({
+const SectionSchema = new Schema({
     name: { type: String, required: true },
     description: { type: String },
     sectionType: {type:String , enum:['Quiz' , 'Coding']} ,
@@ -9,7 +9,7 @@ const SectionSchema = Schema({
     problemset : [{type:mongoose.Schema.Types.ObjectId , ref:'Problem'}]
 })
 
-const TestSchema = Schema({
+const TestSchema = new Schema({
     sections:[SectionSchema],
     name: { type: String, required: true },
     description: { type: String },
